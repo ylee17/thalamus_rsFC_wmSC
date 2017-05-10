@@ -37,10 +37,9 @@ for i in [CFN]*
 
 #### nuisance_matrix.py
 #### nuisance_glm.sh
-
 #	fsl_regfilt -i ${i}/feat_preSmoothing/rs_ref_registered3.feat/filtered_func_data.nii.gz -d ${i}/nuisance/design.mat -o ${i}/feat_preSmoothing/regfilt_CSF_WM_regressed -f 1,2
-
-#    fsl_regfilt -i ${i}/feat_preSmoothing/regfilt_CSF_WM_regressed -d ${i}/motion/design.mat -o ${i}/feat_preSmoothing/regfilt_motion_regressed_CSF_WM_regressed -f 1
+	
+#	fsl_regfilt -i ${i}/feat_preSmoothing/regfilt_CSF_WM_regressed -d ${i}/motion/design.mat -o ${i}/feat_preSmoothing/regfilt_motion_regressed_CSF_WM_regressed -f 1
 
 
 	    #### GLM -- try 3 EVs
@@ -58,7 +57,7 @@ for i in [CFN]*
 #### FEAT -- smoothing, temporal filtering ("regfilt_motion_regressed_CSF_WM_regressed" as input)
 
 
-	mv ${i}/feat_preSmoothing/regfilt_motion_regressed_CSF_WM_regressed.feat ${i}/feat_postSmoothing/
+#	mv ${i}/feat_preSmoothing/regfilt_motion_regressed_CSF_WM_regressed.feat ${i}/feat_postSmoothing/
 
 
 
