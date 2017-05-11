@@ -1,43 +1,58 @@
+# Possible future changes
+# - names should be shortened
+
 for i in C*
 do
+    dsDir=${i}/downsampled
+    postSmoothingDir=${i}/feat_postSmoothing
+    preprocDir=${postSmoothingDir}/regfilt_motion_regressed_CSF_WM_regressed.feat
+    filtered_data=${preprocDir}/filtered_func_data.nii.gz # fc map
+    thal_mask=masks/atlasHo_bilateral_thalamus.nii.gz
 
-fslmaths  ${i}/feat_postSmoothing/regfilt_motion_regressed_CSF_WM_regressed.feat/filtered_func_data.nii.gz -mas masks/atlasHO_bilateral_thalamus.nii.gz ${i}/feat_postSmoothing/B_thal_on_filtered_func_data.nii.gz
+    mkdir ${dsDir}
 
-	mkdir ${i}/downsampled
+    # Mask fc map with the thalamus mask
+    fslmaths  \
+        ${filtered_data} \
+        -mas ${thal_mask} \
+        ${postSmoothingDir}/B_thal_on_filtered_func_data.nii.gz
 
+    for isolevel in 3 4 5
+    do
+        # Downsampling the whole brain fc map
+        flirt \
+            -in ${filtered_data} \
+            -ref ${filtered_data} \
+            -out ${dsDir}/${isolevel}ds_filtered_func_data.nii.gz \
+            -applyisoxfm ${isolevel} \
+            -interp nearestneighbour \
+            -omat ${dsDir}/filtered_funct_TO_${isolevel}mm.mat
 
-	flirt -in ${i}/feat_postSmoothing/regfilt_motion_regressed_CSF_WM_regressed.feat/filtered_func_data.nii.gz -ref ${i}/feat_postSmoothing/regfilt_motion_regressed_CSF_WM_regressed.feat/filtered_func_data.nii.gz -out ${i}/downsampled/3ds_filtered_func_data.nii.gz -applyisoxfm 3 -interp nearestneighbour -omat ${i}/downsampled/filtered_funct_TO_3mm.mat
-	flirt -in ${i}/feat_postSmoothing/B_thal_on_filtered_func_data.nii.gz -ref ${i}/feat_postSmoothing/B_thal_on_filtered_func_data.nii.gz -out ${i}/downsampled/3ds_B_thal_on_filtered_func_data.nii.gz -applyisoxfm 3 -interp nearestneighbour -omat ${i}/downsampled/B_thal_on_filtered_func_TO_3mm.mat
+        # Downsampling the thalamus fc map
+        flirt \
+            -in ${postSmoothingDir}/B_thal_on_filtered_func_data.nii.gz \
+            -ref ${postSmoothingDir}/B_thal_on_filtered_func_data.nii.gz \
+            -out ${dsDir}/${isolevel}ds_B_thal_on_filtered_func_data.nii.gz \
+            -applyisoxfm ${isolevel} \
+            -interp nearestneighbour \
+            -omat ${dsDir}/B_thal_on_filtered_func_TO_${isolevel}mm.mat
 
-    convert_xfm -omat ${i}/downsampled/3mm_TO_filtered_func.mat -inverse ${i}/downsampled/filtered_funct_TO_3mm.mat
-    convert_xfm -omat ${i}/downsampled/3mmB_thal_TO_B_thal_on_filtered_func.mat -inverse ${i}/downsampled/B_thal_on_filtered_func_TO_3mm.mat
+        # estimating the matrix for
+        # downsampled image --> original image
+        convert_xfm \
+            -omat ${dsDir}/${isolevel}mm_TO_filtered_func.mat \
+            -inverse ${dsDir}/filtered_funct_TO_${isolevel}mm.mat
 
-    flirt -in ${i}/downsampled/3ds_filtered_func_data.nii.gz -ref ${i}/feat_postSmoothing/regfilt_motion_regressed_CSF_WM_regressed.feat/filtered_func_data.nii.gz -applyxfm -init ${i}/downsampled/3mm_TO_filtered_func.mat -out ${i}/downsampled/3ds_backTo_filtered_func.nii.gz 
-
-
-
-
-	flirt -in ${i}/feat_postSmoothing/regfilt_motion_regressed_CSF_WM_regressed.feat/filtered_func_data.nii.gz -ref ${i}/feat_postSmoothing/regfilt_motion_regressed_CSF_WM_regressed.feat/filtered_func_data.nii.gz -out ${i}/downsampled/4ds_filtered_func_data.nii.gz -applyisoxfm 4 -interp nearestneighbour -omat ${i}/downsampled/filtered_funct_TO_4mm.mat
-	flirt -in ${i}/feat_postSmoothing/B_thal_on_filtered_func_data.nii.gz -ref ${i}/feat_postSmoothing/B_thal_on_filtered_func_data.nii.gz -out ${i}/downsampled/4ds_B_thal_on_filtered_func_data.nii.gz -applyisoxfm 4 -interp nearestneighbour -omat ${i}/downsampled/B_thal_on_filtered_func_TO_4mm.mat
-
-    convert_xfm -omat ${i}/downsampled/4mm_TO_filtered_func.mat -inverse ${i}/downsampled/filtered_funct_TO_4mm.mat
-    convert_xfm -omat ${i}/downsampled/4mmB_thal_TO_B_thal_on_filtered_func.mat -inverse ${i}/downsampled/B_thal_on_filtered_func_TO_4mm.mat
-
-    flirt -in ${i}/downsampled/4ds_filtered_func_data.nii.gz -ref ${i}/feat_postSmoothing/regfilt_motion_regressed_CSF_WM_regressed.feat/filtered_func_data.nii.gz -applyxfm -init ${i}/downsampled/4mm_TO_filtered_func.mat -out ${i}/downsampled/4ds_backTo_filtered_func.nii.gz 
-
-
-
-
-	flirt -in ${i}/feat_postSmoothing/regfilt_motion_regressed_CSF_WM_regressed.feat/filtered_func_data.nii.gz -ref ${i}/feat_postSmoothing/regfilt_motion_regressed_CSF_WM_regressed.feat/filtered_func_data.nii.gz -out ${i}/downsampled/5ds_filtered_func_data.nii.gz -applyisoxfm 5 -interp nearestneighbour -omat ${i}/downsampled/filtered_funct_TO_5mm.mat
-	flirt -in ${i}/feat_postSmoothing/B_thal_on_filtered_func_data.nii.gz -ref ${i}/feat_postSmoothing/B_thal_on_filtered_func_data.nii.gz -out ${i}/downsampled/5ds_B_thal_on_filtered_func_data.nii.gz -applyisoxfm 5 -interp nearestneighbour -omat ${i}/downsampled/B_thal_on_filtered_func_TO_5mm.mat
-
-    convert_xfm -omat ${i}/downsampled/5mm_TO_filtered_func.mat -inverse ${i}/downsampled/filtered_funct_TO_5mm.mat
-    convert_xfm -omat ${i}/downsampled/5mmB_thal_TO_B_thal_on_filtered_func.mat -inverse ${i}/downsampled/B_thal_on_filtered_func_TO_5mm.mat
-
-    flirt -in ${i}/downsampled/5ds_filtered_func_data.nii.gz -ref ${i}/feat_postSmoothing/regfilt_motion_regressed_CSF_WM_regressed.feat/filtered_func_data.nii.gz -applyxfm -init ${i}/downsampled/5mm_TO_filtered_func.mat -out ${i}/downsampled/5ds_backTo_filtered_func.nii.gz 
-
+        # shouldn't this be same as the above?
+        convert_xfm \
+            -omat ${dsDir}/${isolevel}mmB_thal_TO_B_thal_on_filtered_func.mat \
+            -inverse ${dsDir}/B_thal_on_filtered_func_TO_${isolevel}mm.mat
+        
+        # Registration back to original space (upsampling)
+        flirt \
+            -in ${dsDir}/${isolevel}ds_filtered_func_data.nii.gz \
+            -ref ${preprocDir}/filtered_func_data.nii.gz \
+            -applyxfm -init ${dsDir}/${isolevel}mm_TO_filtered_func.mat \
+            -out ${dsDir}/${isolevel}ds_backTo_filtered_func.nii.gz 
+    done
 done
-
-
-
-
