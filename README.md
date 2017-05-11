@@ -29,4 +29,4 @@ to be written
 
 - Yoobin Kwak
 - Kevin Cho
-- Yoonji Lee
+- *Yoonji Lee*
