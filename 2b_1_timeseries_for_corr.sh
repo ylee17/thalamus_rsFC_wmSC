@@ -1,23 +1,24 @@
-flirt -in masks/atlasHO_bilateral_thalamus.nii.gz -ref masks/atlasHO_bilateral_thalamus.nii.gz -out masks/3ds_atlasHO_bilateral_thalamus.nii.gz -applyisoxfm 3 -interp nearestneighbour
-
-flirt -in masks/atlasHO_bilateral_thalamus.nii.gz -ref masks/atlasHO_bilateral_thalamus.nii.gz -out masks/4ds_atlasHO_bilateral_thalamus.nii.gz -applyisoxfm 4 -interp nearestneighbour
-
-flirt -in masks/atlasHO_bilateral_thalamus.nii.gz -ref masks/atlasHO_bilateral_thalamus.nii.gz -out masks/5ds_atlasHO_bilateral_thalamus.nii.gz -applyisoxfm 5 -interp nearestneighbour
-
-
-
-
-
-for i in [CFN]*
+for isoLevel in 3 4 5
 do
+    # Downsample the masks
+    flirt \
+        -in masks/atlasHO_bilateral_thalamus.nii.gz \
+        -ref masks/atlasHO_bilateral_thalamus.nii.gz \
+        -out masks/${isoLevel}/ds_atlasHO_bilateral_thalamus.nii.gz \
+        -applyisoxfm ${isoLevel}/ \
+        -interp nearestneighbour
 
-	fslmeants -i ${i}/downsampled/3ds_filtered_func_data.nii.gz -m masks/3ds_atlasHO_bilateral_thalamus.nii.gz --showall >> ${i}/timeSeries/3ds_B_thalamus_masked_showall.txt
-	fslmeants -i ${i}/downsampled/3ds_filtered_func_data.nii.gz --showall >> ${i}/timeSeries/3ds_filtered_func_showall.txt
-
-	fslmeants -i ${i}/downsampled/4ds_filtered_func_data.nii.gz -m masks/4ds_atlasHO_bilateral_thalamus.nii.gz --showall >> ${i}/timeSeries/4ds_B_thalamus_masked_showall.txt
-	fslmeants -i ${i}/downsampled/4ds_filtered_func_data.nii.gz --showall >> ${i}/timeSeries/4ds_filtered_func_showall.txt
-
-	fslmeants -i ${i}/downsampled/5ds_filtered_func_data.nii.gz -m masks/5ds_atlasHO_bilateral_thalamus.nii.gz --showall >> ${i}/timeSeries/5ds_B_thalamus_masked_showall.txt
-	fslmeants -i ${i}/downsampled/5ds_filtered_func_data.nii.gz --showall >> ${i}/timeSeries/5ds_filtered_func_showall.txt
-
+    for i in [CFN]*
+    do
+        dsFcMap=${i}/downsampled/${isoLevel}ds_filtered_func_data.nii.gz
+        # Masked meants
+        fslmeants \
+            -i ${dsFcMap} \
+            -m masks/${isoLevel}ds_atlasHO_bilateral_thalamus.nii.gz \
+            --showall >> ${i}/timeSeries/${isoLevel}ds_B_thalamus_masked_showall.txt
+        # wholebrain meants
+        fslmeants \
+            -i ${dsFcMap} \
+            --showall >> ${i}/timeSeries/${isoLevel}ds_filtered_func_showall.txt
+    done
 done
