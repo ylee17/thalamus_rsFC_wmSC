@@ -6,7 +6,7 @@ import nilearn
 import scipy
 
 # for every C/F/N* subject in current directory
-for subject in [x for x in os.listdir(os.getcwd()) if subject.startswith(('C','F','N'))]:
+for subject in [x for x in os.listdir(os.getcwd()) if x.startswith(('C','F','N'))]:
     img_directory = '{subject}/downsampled'.format(subject=subject)
     ds_rates = '5ds', '4ds', '3ds'
     for ds in ds_rates:
