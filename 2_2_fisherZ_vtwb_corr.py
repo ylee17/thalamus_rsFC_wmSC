@@ -20,34 +20,45 @@ for subject in [x for x in os.listdir(os.getcwd()) if x.startswith(('C','F','N')
         wb = nb.load(wb_img)
         thal = nb.load(thal_img)
     
+        # print shape of the image data array
         wbd = wb.get_data()
         thald = thal.get_data()
         print(wbd.shape)
         print(thald.shape)
     
+        # coords iterates over 3D index of the volume array
         volume_shape = wbd.shape[:-1]
         coords = list(np.ndindex(volume_shape))
+        print(coords)
 
+        # transpose thalamus image data array into thal_coords 
         thal_x, thal_y, thal_z = np.where(thald[:,:,:,0] != 0)
         thal_coords = np.array((thal_x, thal_y, thal_z)).T
+        print(thal_coords)
 
         thald_nonzero = thald[np.where(thald[:,:,:,0] != 0)]
+        print(thald_nonzero)
 
+        # reshape arrays
         wbd_reshape = wbd.reshape(len(coords), wbd.shape[3])
         thald_reshape = thald_nonzero.reshape(len(thal_coords), wbd.shape[3])
-
+        print(wbd_reshape)
+        print(thald_reshape)
         m_wb_ts = wbd_reshape - wbd_reshape.mean(1)[:,None] 
         m_thal_ts = thald_nonzero - thald_nonzero.mean(1)[:,None]
 
+        # get correlation
         ss_wb_ts = (m_wb_ts**2).sum(1)
         ss_thal_ts = (m_thal_ts**2).sum(1)
 
         corrMap = np.dot(m_wb_ts,m_thal_ts.T)/np.sqrt(np.dot(ss_wb_ts[:,None],ss_thal_ts[None]))
-
+        print corrMap 
         corrMap_reshape = corrMap.reshape(volume_shape[0], 
                                           volume_shape[1], 
                                           volume_shape[2], 
                                           len(thal_coords))        
+        print corrMap_reshape
+
 
         # write images
         img = nb.Nifti1Image(corrMap_reshape, affine=thal.affine)
